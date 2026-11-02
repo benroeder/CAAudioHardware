@@ -18,3 +18,18 @@ extension UInt32 {
 		], as: UTF8.self)
 	}
 }
+
+extension OSStatus {
+	/// Returns `self` as a four character code string when its four bytes are printable ASCII, and as a decimal number
+	/// otherwise.
+	///
+	/// Error statuses may be negative, which `UInt32(_:)` cannot represent.
+	var fourCC: String {
+		let bits = UInt32(bitPattern: self)
+		let bytes = [bits >> 24, bits >> 16, bits >> 8, bits].map { UInt8($0 & 0xff) }
+		guard bytes.allSatisfy({ $0 >= 0x20 && $0 < 0x7f }) else {
+			return String(self)
+		}
+		return bits.fourCC
+	}
+}
