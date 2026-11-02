@@ -1,4 +1,5 @@
 import XCTest
+import CoreAudio
 @testable import CAAudioHardware
 
 final class CAAudioHardwareTests: XCTestCase {
@@ -15,6 +16,39 @@ final class CAAudioHardwareTests: XCTestCase {
 
 			_ = try device.streams(inScope: .output)
 			_ = try device.streams(inScope: .input)
+		}
+	}
+
+	func testStatusFourCC() {
+		XCTAssertEqual(kAudioHardwareBadObjectError.fourCC, "!obj")
+		XCTAssertEqual(OSStatus(-308).fourCC, "-308")
+		XCTAssertEqual(OSStatus(-50).fourCC, "-50")
+	}
+
+	/// For a few milliseconds after a process tap is destroyed, reads on it can fail with a negative status (-308 on
+	/// macOS 27) before they settle on `kAudioHardwareBadObjectError`. Each failure must be thrown.
+	func testReadingATapAsItIsDestroyed() throws {
+		guard #available(macOS 14.2, *) else {
+			throw XCTSkip("Process taps need macOS 14.2")
+		}
+		for _ in 0..<20 {
+			let description = CATapDescription(stereoMixdownOfProcesses: [])
+			description.isPrivate = true
+			var tapID = AudioObjectID(kAudioObjectUnknown)
+			guard AudioHardwareCreateProcessTap(description, &tapID) == kAudioHardwareNoError else {
+				throw XCTSkip("A process tap could not be created")
+			}
+			XCTAssertEqual(AudioHardwareDestroyProcessTap(tapID), kAudioHardwareNoError)
+			let deadline = ContinuousClock.now + .seconds(2)
+			var settled = false
+			while !settled && ContinuousClock.now < deadline {
+				do {
+					_ = try AudioObject.make(tapID)
+				} catch let error as NSError {
+					settled = error.code == Int(kAudioHardwareBadObjectError)
+				}
+			}
+			XCTAssertTrue(settled, "Reads on the destroyed tap never failed with kAudioHardwareBadObjectError")
 		}
 	}
 

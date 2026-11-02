@@ -19,7 +19,7 @@ public class AudioAggregateDevice: AudioDevice {
 		var objectID: AudioObjectID = kAudioObjectUnknown
 		let result = AudioHardwareCreateAggregateDevice(description as CFDictionary, &objectID)
 		guard result == kAudioHardwareNoError else {
-			os_log(.error, log: audioObjectLog, "AudioHardwareCreateAggregateDevice (%{public}@) failed: '%{public}@'", description, UInt32(result).fourCC)
+			os_log(.error, log: audioObjectLog, "AudioHardwareCreateAggregateDevice (%{public}@) failed: '%{public}@'", description, result.fourCC)
 			throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: nil)
 		}
 		return AudioAggregateDevice(objectID)
@@ -38,7 +38,7 @@ public class AudioAggregateDevice: AudioDevice {
 	public static func destroy(_ device: AudioAggregateDevice) throws {
 		let result = AudioHardwareDestroyAggregateDevice(device.objectID)
 		guard result == kAudioHardwareNoError else {
-			os_log(.error, log: audioObjectLog, "AudioHardwareDestroyAggregateDevice (0x%x) failed: '%{public}@'", device.objectID, UInt32(result).fourCC)
+			os_log(.error, log: audioObjectLog, "AudioHardwareDestroyAggregateDevice (0x%x) failed: '%{public}@'", device.objectID, result.fourCC)
 			throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: nil)
 		}
 		device.removeAllPropertyListeners()
