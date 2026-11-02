@@ -45,7 +45,7 @@ public class AudioObject: Equatable, Hashable, CustomDebugStringConvertible {
 				var address = property.rawValue
 				let result = AudioObjectRemovePropertyListenerBlock(objectID, &address, listener.queue, listener.block)
 				if result != kAudioHardwareNoError {
-					os_log(.error, log: audioObjectLog, "AudioObjectRemovePropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, UInt32(result).fourCC)
+					os_log(.error, log: audioObjectLog, "AudioObjectRemovePropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, result.fourCC)
 				}
 			}
 			$0.removeAll()
@@ -72,7 +72,7 @@ public class AudioObject: Equatable, Hashable, CustomDebugStringConvertible {
 		var settable: DarwinBoolean = false
 		let result = AudioObjectIsPropertySettable(objectID, &address, &settable)
 		guard result == kAudioHardwareNoError else {
-			os_log(.error, log: audioObjectLog, "AudioObjectIsPropertySettable (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, UInt32(result).fourCC)
+			os_log(.error, log: audioObjectLog, "AudioObjectIsPropertySettable (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, result.fourCC)
 			let userInfo = [NSLocalizedDescriptionKey: NSLocalizedString("Mutability information for the property \(property.selector) in scope \(property.scope) on audio object 0x\(objectID.hexString) could not be retrieved.", comment: "")]
 			throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: userInfo)
 		}
@@ -100,7 +100,7 @@ public class AudioObject: Equatable, Hashable, CustomDebugStringConvertible {
 		if let listener {
 			let result = AudioObjectRemovePropertyListenerBlock(objectID, &address, listener.queue, listener.block)
 			guard result == kAudioHardwareNoError else {
-				os_log(.error, log: audioObjectLog, "AudioObjectRemovePropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, UInt32(result).fourCC)
+				os_log(.error, log: audioObjectLog, "AudioObjectRemovePropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, result.fourCC)
 				let userInfo = [NSLocalizedDescriptionKey: NSLocalizedString("The listener block for the property \(property.selector) on audio object 0x\(objectID.hexString) could not be removed.", comment: "")]
 				throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: userInfo)
 			}
@@ -123,7 +123,7 @@ public class AudioObject: Equatable, Hashable, CustomDebugStringConvertible {
 
 			let result = AudioObjectAddPropertyListenerBlock(objectID, &address, listener.queue, listener.block)
 			guard result == kAudioHardwareNoError else {
-				os_log(.error, log: audioObjectLog, "AudioObjectAddPropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, UInt32(result).fourCC)
+				os_log(.error, log: audioObjectLog, "AudioObjectAddPropertyListenerBlock (0x%x, %{public}@) failed: '%{public}@'", objectID, property.description, result.fourCC)
 				let userInfo = [NSLocalizedDescriptionKey: NSLocalizedString("The listener block for the property \(property.selector) on audio object 0x\(objectID.hexString) could not be added.", comment: "")]
 				throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: userInfo)
 			}

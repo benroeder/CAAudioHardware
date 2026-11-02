@@ -18,3 +18,12 @@ extension UInt32 {
 		])
 	}
 }
+
+extension OSStatus {
+	/// Returns the bit pattern of `self` as a four character code string.
+	///
+	/// Error statuses may be negative, which `UInt32(_:)` cannot represent.
+	var fourCC: String {
+		UInt32(bitPattern: self).fourCC
+	}
+}
