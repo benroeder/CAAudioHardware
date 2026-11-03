@@ -18,11 +18,7 @@ public class AudioAggregateDevice: AudioDevice {
 	public static func create(description: [AnyHashable: Any]) throws -> AudioAggregateDevice {
 		var objectID: AudioObjectID = kAudioObjectUnknown
 		let result = AudioHardwareCreateAggregateDevice(description as CFDictionary, &objectID)
-		guard result == kAudioHardwareNoError else {
-			os_log(.error, log: audioObjectLog, "AudioHardwareCreateAggregateDevice (%{public}@) failed: '%{public}@'", description, result.fourCC)
-			throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: nil)
-		}
-		return AudioAggregateDevice(objectID)
+		return AudioAggregateDevice(try createdObject(result, objectID, "AudioHardwareCreateAggregateDevice (\(description))"))
 	}
 
 #if false

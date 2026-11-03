@@ -391,6 +391,25 @@ extension AudioObject {
 /// The log for `AudioObject` and subclasses
 let audioObjectLog = OSLog(subsystem: "org.sbooth.CAAudioHardware", category: "AudioObject")
 
+/// Returns the object a HAL create call made, or throws: the call's error, or `kAudioHardwareUnspecifiedError` when it
+/// reported success but handed back no object, which `AudioObject` cannot wrap.
+/// - parameter result: The status the create call returned
+/// - parameter objectID: The object it handed back
+/// - parameter operation: What was created, for the log
+/// - returns: `objectID`
+/// - throws: An error if the call failed or made no object
+func createdObject(_ result: OSStatus, _ objectID: AudioObjectID, _ operation: String) throws -> AudioObjectID {
+	guard result == kAudioHardwareNoError else {
+		os_log(.error, log: audioObjectLog, "%{public}@ failed: '%{public}@'", operation, result.fourCC)
+		throw NSError(domain: NSOSStatusErrorDomain, code: Int(result), userInfo: nil)
+	}
+	guard objectID != kAudioObjectUnknown else {
+		os_log(.error, log: audioObjectLog, "%{public}@ reported success but made no object", operation)
+		throw NSError(domain: NSOSStatusErrorDomain, code: Int(kAudioHardwareUnspecifiedError), userInfo: nil)
+	}
+	return objectID
+}
+
 // MARK: - AudioObject Creation
 
 // Class clusters in the Objective-C sense can't be implemented in Swift
