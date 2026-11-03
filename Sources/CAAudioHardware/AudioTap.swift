@@ -44,11 +44,7 @@ public class AudioTap: AudioObject, @unchecked Sendable {
 	public static func create(description: CATapDescription) throws -> AudioTap {
 		var objectId = kAudioObjectUnknown
 		let result = AudioHardwareCreateProcessTap(description, &objectId)
-		guard result == kAudioHardwareNoError else {
-			os_log(.error, log: audioObjectLog, "AudioHardwareCreateProcessTap (%{public}@) failed: '%{public}@'", description, result.fourCC)
-			throw NSError(domain: NSOSStatusErrorDomain, code: Int(result))
-		}
-		return AudioTap(objectId)
+		return AudioTap(try createdObject(result, objectId, "AudioHardwareCreateProcessTap (\(description))"))
 	}
 
 #if false

@@ -36,6 +36,18 @@ final class CAAudioHardwareTests: XCTestCase {
 		XCTAssertEqual(OSStatus(-50).fourCC, "-50")
 	}
 
+	/// A create call can report success and still hand back no object; that must be thrown, not wrapped, since an
+	/// object of ID 0 traps `AudioObject`'s precondition.
+	func testCreatedObject() throws {
+		XCTAssertEqual(try createdObject(kAudioHardwareNoError, 42, "create a tap"), 42)
+		XCTAssertThrowsError(try createdObject(kAudioHardwareNoError, kAudioObjectUnknown, "create a tap")) { error in
+			XCTAssertEqual((error as NSError).code, Int(kAudioHardwareUnspecifiedError))
+		}
+		XCTAssertThrowsError(try createdObject(-50, 42, "create a tap")) { error in
+			XCTAssertEqual((error as NSError).code, -50)
+		}
+	}
+
 	/// For a few milliseconds after a process tap is destroyed, reads on it can fail with a negative status (-308 on
 	/// macOS 27) before they settle on `kAudioHardwareBadObjectError`. Each failure must be thrown.
 	func testReadingATapAsItIsDestroyed() throws {
